@@ -23,14 +23,15 @@ OptionParser.new do |opts|
 	end
 end.parse!
 
-puts options
-
 def pipe(options)
 	socket = TCPSocket.open(options[:ip], options[:port])
 
 	puts "Starting the Client..................."
 	puts socket.gets
 
+	if options.has_key? :delay
+		sleep(options[:delay])
+	end
 
 	STDIN.read.split("\n").each do |a|
    	socket.write(a)
