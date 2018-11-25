@@ -1,7 +1,7 @@
 require 'optparse'
-require 'optparse/uri'
 require 'socket'
 
+# Default server and port options
 options = {
 	:ip => 'seashells.io',
 	:port => '1337'
@@ -24,20 +24,23 @@ OptionParser.new do |opts|
 end.parse!
 
 def pipe(options)
-	socket = TCPSocket.open(options[:ip], options[:port])
+	begin
+		socket = TCPSocket.open(options[:ip], options[:port])
+	rescue
+		puts "[SOCKET ERR] Could not find the server"
+	else
+		puts "Starting the Client..................."
+		puts socket.gets
 
-	puts "Starting the Client..................."
-	puts socket.gets
+		if options.has_key? :delay
+			sleep(options[:delay])
+		end
 
-	if options.has_key? :delay
-		sleep(options[:delay])
+		STDIN.read.split("\n").each do |a|
+   		socket.write(a)
+		end
+		socket.close
 	end
-
-	STDIN.read.split("\n").each do |a|
-   	socket.write(a)
-	end
-
-	socket.close
 end
 
 pipe(options)
