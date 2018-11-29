@@ -8,7 +8,7 @@ options = {
 }
 
 OptionParser.new do |opts|
-	opts.banner = "Usage: seashells [options] "
+	opts.banner = "Usage: seashells [options]"
 	opts.on("-i", "--ip [IP | URI]", "custom IP address or URI; default: seashells.io") do |ip|
 		options[:ip] = ip
 	end
@@ -23,22 +23,32 @@ OptionParser.new do |opts|
 	end
 end.parse!
 
-def pipe(options)
+def pipe(options={})
 	begin
 		socket = TCPSocket.open(options[:ip], options[:port])
-	rescue
-		puts "[SOCKET ERR] Could not find the server"
+	rescue Errno::ETIMEDOUT
+		return "Connection timed out"
+	rescue Errno::ECONNREFUSED
+		return "Connection refused"
+	rescue SocketError
+		return "Socket Error"
 	else
-		puts "Starting the Client..................."
-		puts socket.gets
+		puts "Starting the Client...................\n"
+		seashells_url =  socket.gets
 
 		if options.has_key? :delay
 			sleep(options[:delay])
 		end
 
-		STDIN.read.split("\n").each do |a|
-   		socket.write(a)
+		console_input = STDIN.read.split("\n")
+		console_input.each do |a|
+   			socket.write(a)
 		end
+
+		if options.has_key? :output
+			puts console_input
+		end
+	ensure
 		socket.close
 	end
 end
