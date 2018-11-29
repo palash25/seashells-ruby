@@ -49,6 +49,9 @@ def pipe(options={})
 			puts console_input
 		end
 	ensure
+		if defined? seashells_url
+			puts "Piped output is available at url below", seashells_url
+		end
 		socket.close
 	end
 end
